@@ -1,5 +1,6 @@
-import db from '../Config/db.js';
-import bcrypt from 'bcryptjs';
+import db from "../Config/db.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 // Bagian: Controller Admin
 
@@ -9,9 +10,12 @@ export const createAdmin = async (req, res) => {
 
   try {
     // Bagian: Cek Email Terdaftar
-    const [existing] = await db.query('SELECT id FROM tabel_admin WHERE email = ?', [email]);
+    const [existing] = await db.query(
+      "SELECT id FROM tabel_admin WHERE email = ?",
+      [email],
+    );
     if (existing.length > 0) {
-      return res.status(400).json({ message: 'Email sudah terdaftar!' });
+      return res.status(400).json({ message: "Email sudah terdaftar!" });
     }
 
     // Bagian: Hash Password
@@ -19,58 +23,87 @@ export const createAdmin = async (req, res) => {
 
     const [result] = await db.query(
       `INSERT INTO tabel_admin (nama_lengkap, email, password) VALUES (?, ?, ?)`,
-      [nama_lengkap, email, hashedPassword]
+      [nama_lengkap, email, hashedPassword],
     );
 
-    res.status(201).json({ 
-      message: 'Admin berhasil ditambahkan!', 
-      id: result.insertId 
+    res.status(201).json({
+      message: "Admin berhasil ditambahkan!",
+      id: result.insertId,
     });
   } catch (error) {
     console.error("Error insert admin:", error);
-    res.status(500).json({ message: 'Gagal menambahkan admin', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Gagal menambahkan admin", error: error.message });
   }
 };
 
 // Bagian: Login Admin
 export const loginAdmin = async (req, res) => {
   const { email, password } = req.body;
-
+  // console.log("Login attempt for email:", email);
   try {
-    const [rows] = await db.query('SELECT * FROM tabel_admin WHERE email = ?', [email]);
-    
+    const [rows] = await db.query("SELECT * FROM tabel_admin WHERE email = ?", [
+      email,
+    ]);
+
     if (rows.length === 0) {
-      return res.status(401).json({ message: 'Email atau password salah!' });
+      return res.status(401).json({ message: "Email atau password salah!" });
     }
 
     const admin = rows[0];
-    const isPasswordValid = await bcrypt.compare(password, admin.password);
+    let isPasswordValid = false;
+
+    // Check if password is hashed (bcrypt) or plain text
+    if (
+      admin.password.startsWith("$2a$") ||
+      admin.password.startsWith("$2b$") ||
+      admin.password.startsWith("$2y$")
+    ) {
+      // Password is hashed with bcrypt
+      isPasswordValid = await bcrypt.compare(password, admin.password);
+    } else {
+      // Password is plain text (for backward compatibility)
+      isPasswordValid = password === admin.password;
+    }
 
     if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Email atau password salah!' });
+      return res.status(401).json({ message: "Email atau password salah!" });
     }
 
     // Bagian: Hapus Password Response
     const { password: _, ...adminData } = admin;
 
-    res.status(200).json({ 
-      message: 'Login berhasil!',
-      admin: adminData
+    // Bagian: Generate JWT
+    const token = jwt.sign(
+      { id: admin.id, email: admin.email },
+      process.env.JWT_SECRET || "secret",
+      { expiresIn: "1h" },
+    );
+
+    res.status(200).json({
+      message: "Login berhasil!",
+      admin: adminData,
+      token,
     });
   } catch (error) {
     console.error("Error login admin:", error);
-    res.status(500).json({ message: 'Gagal login', error: error.message });
+    res.status(500).json({ message: "Gagal login", error: error.message });
   }
 };
 
 // Bagian: Get Semua Admin
 export const getAllAdmin = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT id, nama_lengkap, email, dibuat_pada FROM tabel_admin ORDER BY id DESC');
+    const [rows] = await db.query(
+      "SELECT id, nama_lengkap, email, dibuat_pada FROM tabel_admin ORDER BY id DESC",
+    );
     res.status(200).json(rows);
   } catch (error) {
     console.error("Error get all admin:", error);
-    res.status(500).json({ message: 'Gagal mengambil data admin', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Gagal mengambil data admin", error: error.message });
   }
 };
 
@@ -78,15 +111,20 @@ export const getAllAdmin = async (req, res) => {
 export const getAdminById = async (req, res) => {
   const { id } = req.params;
   try {
-    const [rows] = await db.query('SELECT id, nama_lengkap, email, dibuat_pada FROM tabel_admin WHERE id = ?', [id]);
-    
+    const [rows] = await db.query(
+      "SELECT id, nama_lengkap, email, dibuat_pada FROM tabel_admin WHERE id = ?",
+      [id],
+    );
+
     if (rows.length === 0) {
-      return res.status(404).json({ message: 'Admin tidak ditemukan' });
+      return res.status(404).json({ message: "Admin tidak ditemukan" });
     }
     res.status(200).json(rows[0]);
   } catch (error) {
     console.error("Error get admin by id:", error);
-    res.status(500).json({ message: 'Gagal mengambil data admin', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Gagal mengambil data admin", error: error.message });
   }
 };
 
@@ -101,24 +139,27 @@ export const updateAdmin = async (req, res) => {
     if (password) {
       // Bagian: Password Diubah
       const hashedPassword = await bcrypt.hash(password, 10);
-      query = 'UPDATE tabel_admin SET nama_lengkap = ?, email = ?, password = ? WHERE id = ?';
+      query =
+        "UPDATE tabel_admin SET nama_lengkap = ?, email = ?, password = ? WHERE id = ?";
       params = [nama_lengkap, email, hashedPassword, id];
     } else {
       // Bagian: Password Tidak Diubah
-      query = 'UPDATE tabel_admin SET nama_lengkap = ?, email = ? WHERE id = ?';
+      query = "UPDATE tabel_admin SET nama_lengkap = ?, email = ? WHERE id = ?";
       params = [nama_lengkap, email, id];
     }
 
     const [result] = await db.query(query, params);
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Admin tidak ditemukan' });
+      return res.status(404).json({ message: "Admin tidak ditemukan" });
     }
 
-    res.status(200).json({ message: 'Data admin berhasil diupdate!' });
+    res.status(200).json({ message: "Data admin berhasil diupdate!" });
   } catch (error) {
     console.error("Error update admin:", error);
-    res.status(500).json({ message: 'Gagal update admin', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Gagal update admin", error: error.message });
   }
 };
 
@@ -127,15 +168,19 @@ export const deleteAdmin = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [result] = await db.query('DELETE FROM tabel_admin WHERE id = ?', [id]);
+    const [result] = await db.query("DELETE FROM tabel_admin WHERE id = ?", [
+      id,
+    ]);
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Admin tidak ditemukan' });
+      return res.status(404).json({ message: "Admin tidak ditemukan" });
     }
 
-    res.status(200).json({ message: 'Admin berhasil dihapus!' });
+    res.status(200).json({ message: "Admin berhasil dihapus!" });
   } catch (error) {
     console.error("Error delete admin:", error);
-    res.status(500).json({ message: 'Gagal menghapus admin', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Gagal menghapus admin", error: error.message });
   }
 };

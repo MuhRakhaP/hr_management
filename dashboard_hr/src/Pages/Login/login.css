@@ -1,0 +1,260 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(59, 130, 246, 0.16),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(99, 102, 241, 0.14),
+      transparent 18%
+    ),
+    linear-gradient(135deg, #eff6ff 0%, #f8fafc 45%, #eef2ff 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-page::before,
+.login-page::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.18;
+}
+
+.login-page::before {
+  width: 200px;
+  height: 200px;
+  background: rgba(59, 130, 246, 0.3);
+  top: 40px;
+  left: 40px;
+}
+
+.login-page::after {
+  width: 160px;
+  height: 160px;
+  background: rgba(99, 102, 241, 0.3);
+  bottom: 40px;
+  right: 40px;
+}
+
+.login-shell {
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 32px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.08);
+  padding: 38px;
+  backdrop-filter: blur(14px);
+}
+
+.login-logo {
+  width: 88px;
+  height: 88px;
+  border-radius: 24px;
+  margin: 0 auto 24px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #2563eb 0%, #4338ca 100%);
+  box-shadow: 0 20px 48px rgba(59, 130, 246, 0.18);
+}
+
+.login-logo span {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: white;
+}
+
+.login-heading {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.login-heading h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  color: #0f172a;
+}
+
+.login-heading p {
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.login-toggle {
+  display: flex;
+  gap: 8px;
+  background: #f8fafc;
+  border-radius: 18px;
+  padding: 6px;
+  margin-bottom: 32px;
+}
+
+.login-toggle button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 14px 0;
+  border-radius: 16px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-toggle button.active {
+  background: white;
+  color: #2563eb;
+  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.15);
+  transform: translateY(-1px);
+}
+
+.login-form {
+  display: grid;
+  gap: 22px;
+}
+
+.form-field {
+  display: grid;
+  gap: 8px;
+}
+
+.form-field label {
+  color: #334155;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 0.95rem;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.form-field input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+}
+
+.field-with-icon {
+  position: relative;
+}
+
+.field-icon,
+.field-password-toggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+.field-password-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #dc2626;
+  font-size: 0.82rem;
+}
+
+.submit-button {
+  width: 100%;
+  border: none;
+  padding: 14px 18px;
+  border-radius: 18px;
+  font-weight: 700;
+  color: white;
+  font-size: 1rem;
+  background: linear-gradient(135deg, #2563eb 0%, #4338ca 100%);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.submit-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 36px rgba(59, 130, 246, 0.2);
+}
+
+.submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.submit-button .spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.login-footer {
+  margin-top: 28px;
+  text-align: center;
+  font-size: 0.92rem;
+  color: #64748b;
+}
+
+.login-footer button {
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  cursor: pointer;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+@media (max-width: 500px) {
+  .login-card {
+    padding: 28px;
+  }
+
+  .login-toggle {
+    flex-direction: column;
+  }
+
+  .login-toggle button {
+    width: 100%;
+  }
+}
