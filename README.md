@@ -95,3 +95,4 @@ cd dashboard_hr\Backend
 
 # Run Backend
 cd dashboard_hr\Backend\pnpm run dev
+# hr_management
