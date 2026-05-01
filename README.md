@@ -1,5 +1,5 @@
-# portofolio
-Project aplikasi React berbasis CRUD sebagai portfolio dan tugas Ujian. Menggunakan React dan Firebase/MySQL
+
+Project aplikasi React berbasis CRUD. Menggunakan React dan Firebase/MySQL
 
 --LANGKAH 1
 Pastikan sudah terinstall:
